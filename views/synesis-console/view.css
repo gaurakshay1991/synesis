@@ -1,0 +1,38 @@
+:root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.shell { min-height: 100vh; background: #07111f; color: #e9f2ff; padding: 24px; }
+.hero { display:flex; justify-content:space-between; gap:20px; align-items:flex-start; padding:26px; border:1px solid #21354e; border-radius:22px; background:linear-gradient(135deg,#0c1b2f,#0a1322 60%,#102d3d); }
+.eyebrow,.kicker { font-size:11px; letter-spacing:.16em; color:#66d9c4; font-weight:700; }
+h1 { margin:8px 0 8px; font-size:34px; line-height:1.05; } h2 { margin:6px 0 14px; font-size:20px; } h3 { margin:22px 0 12px; }
+.hero p,.method,.impact p { color:#9eb2c8; max-width:680px; }
+.status { white-space:nowrap; color:#bcd0e4; font-size:12px; background:#0b1728; padding:9px 12px; border-radius:999px; border:1px solid #27405b; }
+.dot { display:inline-block; width:7px; height:7px; margin-right:6px; border-radius:50%; background:#39e0ad; box-shadow:0 0 10px #39e0ad; }
+.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:14px 0; }
+.metric,.panel { background:#0b1728; border:1px solid #20334b; border-radius:18px; }
+.metric { padding:16px; } .metric span,.metric small { display:block; color:#89a0b9; font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+.metric strong { display:block; font-size:28px; margin:6px 0 2px; }
+.grid { display:grid; grid-template-columns:1.35fr .85fr; gap:14px; }
+.panel { padding:20px; } .panelHead { display:flex; justify-content:space-between; gap:16px; align-items:flex-start; }
+textarea { width:100%; min-height:270px; resize:vertical; border-radius:14px; border:1px solid #29415e; background:#07111f; color:#dcecff; padding:14px; line-height:1.5; outline:none; }
+textarea:focus { border-color:#46cbb4; box-shadow:0 0 0 3px rgba(70,203,180,.12); }
+.smallArea { min-height:135px; }
+button { border:0; border-radius:11px; padding:10px 14px; cursor:pointer; background:#43d2b5; color:#04110f; font-weight:800; }
+button:disabled { opacity:.5; cursor:not-allowed; } button.secondary { margin-top:10px; background:#1e3650; color:#d9eaff; border:1px solid #315271; }
+.results { margin-top:14px; }
+.band { padding:8px 12px; border-radius:999px; font-size:12px; font-weight:800; text-transform:uppercase; }
+.band.low { background:#13382f; color:#75e4ba; } .band.moderate { background:#3d3512; color:#f6d86d; } .band.high,.band.critical { background:#481c25; color:#ff9cac; }
+.findingList { display:grid; gap:12px; }
+.finding { border:1px solid #23384f; background:#091421; border-radius:14px; padding:16px; }
+.findingTop { display:flex; align-items:center; gap:10px; }
+.sev { font-size:10px; text-transform:uppercase; letter-spacing:.1em; padding:4px 7px; border-radius:999px; background:#203047; }
+.sev.critical,.sev.high { color:#ff9cac; } .sev.medium { color:#ffe08a; } .sev.low { color:#7ee1bd; }
+blockquote { margin:12px 0; padding:10px 12px; background:#0d1d2e; border-left:3px solid #3dcdb2; color:#bfd0e0; font-size:13px; }
+.cols { display:grid; grid-template-columns:1fr 1fr; gap:14px; } .cols label { display:block; color:#6f8ca7; text-transform:uppercase; letter-spacing:.08em; font-size:10px; }
+.cols p { color:#d3e1ef; font-size:13px; line-height:1.45; }
+.priority { display:inline-block; margin-top:14px; padding:6px 9px; border-radius:8px; background:#193550; color:#8fe0d0; text-transform:uppercase; font-size:11px; font-weight:800; }
+.domain { display:flex; flex-direction:column; gap:4px; border-top:1px solid #20334b; padding:10px 0; } .domain span { color:#9eb2c8; font-size:12px; }
+.obRow { display:grid; grid-template-columns:150px 1fr 240px; gap:12px; border-top:1px solid #20334b; padding:10px 0; font-size:12px; } .obRow span { color:#c6d7e7; } .obRow em { color:#82a0ba; }
+.method { border-top:1px solid #20334b; padding-top:14px; font-size:12px; }
+.errorText,.error { color:#ff9cac; } footer { text-align:center; color:#58718c; font-size:11px; padding:18px 0 4px; }
+@media (max-width: 780px) { .shell{padding:12px}.hero{flex-direction:column}.metrics{grid-template-columns:1fr 1fr}.grid,.cols{grid-template-columns:1fr}.obRow{grid-template-columns:1fr}.panelHead{flex-direction:column}h1{font-size:28px}.status{white-space:normal} }
