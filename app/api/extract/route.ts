@@ -20,7 +20,7 @@ export async function POST(req:Request){
       text=result.value;
     } else if(name.endsWith(".pdf")){
       const pdfjs=await import("pdfjs-dist/legacy/build/pdf.mjs");
-      const pdf=await pdfjs.getDocument({data:new Uint8Array(ab),isEvalSupported:false,useSystemFonts:true}).promise;
+      const pdf=await pdfjs.getDocument({data:new Uint8Array(ab),useSystemFonts:true}).promise;
       const pages:string[]=[];
       for(let i=1;i<=Math.min(pdf.numPages,120);i++){
         const page=await pdf.getPage(i);
