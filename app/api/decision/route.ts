@@ -1,0 +1,2 @@
+import {NextResponse} from "next/server";import {compileRegulation,decisionReceipt} from "@/lib/regulatory-kernel";
+export async function POST(req:Request){const b=await req.json();const c=compileRegulation(String(b.regulation||""),{jurisdiction:b.jurisdiction,sourceRef:b.sourceRef||"Decision source"});return NextResponse.json({compiledRules:c.rules,receipt:decisionReceipt(String(b.action||""),(b.facts||[]).map(String),c.rules)});}
