@@ -5,7 +5,7 @@ import {
   Activity, AlertTriangle, ArrowRight, BadgeCheck, BarChart3, BrainCircuit, Building2,
   CheckCircle2, ChevronRight, Clock3, Database, FileSearch, FileText, Gauge, GitBranch,
   Landmark, Link2, ListChecks, Loader2, Network, RefreshCw, Search, ShieldCheck, Sparkles,
-  UploadCloud, UserRoundCheck, WandSparkles, Download, CircleDot
+  UploadCloud, UserRoundCheck, WandSparkles, Download, CircleDot, Code2, FlaskConical, Fingerprint
 } from "lucide-react";
 
 type Finding={
@@ -14,6 +14,9 @@ type Finding={
 };
 type Analysis={document:string;overallRisk:string;score:number;summary:string;findings:Finding[];engine?:string;generatedAt?:string};
 type RegItem={source:string;title:string;link:string;date:string;summary:string};
+type NormRule={id:string;modality:string;actor:string;action:string;object:string;trigger:string;deadline:string|null;exceptions:string[];evidence:string[];jurisdiction:string;sourceRef:string;sourceText:string;sourceHash:string;confidence:number};
+type ShadowResult={current:{rules:NormRule[];sourceHash:string};proposed:{rules:NormRule[];sourceHash:string};delta:{added:NormRule[];removed:NormRule[];modified:NormRule[]};impact:{impacts:any[];minimumChangeSet:any[];totalEstimatedEffort:number};assets:any[];simulatedAt:string};
+type DecisionResult={compiledRules:NormRule[];receipt:{decision:"ALLOW"|"BLOCK"|"REVIEW";action:string;facts:string[];ruleIds:string[];sourceHashes:string[];timestamp:string;receiptHash:string;reasoning:any[]}};
 
 const seedAnalysis:Analysis={
   document:"Sample Technology Services Agreement",
@@ -34,6 +37,9 @@ const tabs=[
   ["graph","Risk Graph",Network],
   ["obligations","Obligations",ListChecks],
   ["radar","Regulatory Radar",Landmark],
+  ["compiler","Legal Compiler",Code2],
+  ["shadow","Shadow Law",FlaskConical],
+  ["kernel","Decision Kernel",Fingerprint],
   ["evidence","Pilot Evidence",BadgeCheck],
 ] as const;
 
@@ -54,6 +60,14 @@ export default function Home(){
   const [regBusy,setRegBusy]=useState(false);
   const [actions,setActions]=useState<Record<string,string>>({});
   const [pilotStart,setPilotStart]=useState("");
+  const [currentLaw,setCurrentLaw]=useState("A regulated entity shall maintain an inventory of material outsourced service providers and shall retain audit records. A service provider must notify the regulated entity of a material security incident within 72 hours. The regulated entity may appoint a material subcontractor where appropriate due diligence has been completed.");
+  const [proposedLaw,setProposedLaw]=useState("A regulated entity shall maintain a continuously updated inventory of material outsourced service providers and shall retain machine-verifiable audit evidence. A service provider must notify the regulated entity of a material security incident within 24 hours. A regulated entity must not permit appointment of a material subcontractor unless prior risk assessment, approval and contractual flow-down controls are recorded. The regulated entity shall test material outsourcing exit arrangements at least annually.");
+  const [shadow,setShadow]=useState<ShadowResult|null>(null);
+  const [shadowBusy,setShadowBusy]=useState(false);
+  const [actionText,setActionText]=useState("Approve a new cloud subcontractor to process customer transaction data before the risk assessment is completed.");
+  const [actionFacts,setActionFacts]=useState("Material outsourcing; customer transaction data; subcontractor approval pending; risk assessment incomplete.");
+  const [decision,setDecision]=useState<DecisionResult|null>(null);
+  const [decisionBusy,setDecisionBusy]=useState(false);
 
   useEffect(()=>{
     try{
@@ -114,6 +128,26 @@ export default function Home(){
       const j=await r.json();
       setRegs(j.items||[]); setRegTime(j.refreshedAt||new Date().toISOString());
     }finally{setRegBusy(false);}
+  }
+
+  async function runShadow(){
+    setShadowBusy(true); setMessage("");
+    try{
+      const r=await fetch("/api/shadow",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({currentText:currentLaw,proposedText:proposedLaw,jurisdiction:"India / BFSI"})});
+      const j=await r.json(); if(!r.ok) throw new Error(j.error||"Simulation failed");
+      setShadow(j); setTab("shadow");
+    }catch(e:any){setMessage(e.message||"Simulation failed");}
+    finally{setShadowBusy(false);}
+  }
+
+  async function runDecision(){
+    setDecisionBusy(true); setMessage("");
+    try{
+      const r=await fetch("/api/decision",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({regulation:proposedLaw,jurisdiction:"India / BFSI",sourceRef:"Proposed rule set",action:actionText,facts:actionFacts.split(";").map(x=>x.trim()).filter(Boolean)})});
+      const j=await r.json(); if(!r.ok) throw new Error(j.error||"Decision failed");
+      setDecision(j);
+    }catch(e:any){setMessage(e.message||"Decision failed");}
+    finally{setDecisionBusy(false);}
   }
 
   function exportEvidence(){
@@ -220,6 +254,70 @@ export default function Home(){
         <div className="reg-list">{regs.map((x,i)=><a key={i} href={x.link} target="_blank" rel="noreferrer"><div className="reg-source">{x.source}</div><div><h3>{x.title}</h3><p>{x.summary||"Open the source publication for details."}</p><span>{fmtDate(x.date)}</span></div><ArrowRight size={18}/></a>)}</div>}
       </div>}
 
+      {tab==="compiler"&&<div className="page">
+        <div className="section-head"><div><span className="eyebrow">SYNESIS NORMATIVE INTERMEDIATE REPRESENTATION</span><h2>Compile legal prose into executable legal objects</h2><p>Instead of asking a chatbot what a rule means, Synesis converts legal text into typed obligations, prohibitions, permissions, triggers, deadlines, exceptions, evidence requirements and source hashes.</p></div><button className="primary" onClick={runShadow} disabled={shadowBusy}>{shadowBusy?<Loader2 size={17} className="spin"/>:<Code2 size={17}/>} Compile + simulate</button></div>
+        <div className="grid two">
+          <Card title="Current rule set" icon={FileText}><textarea className="editor kernel-editor" value={currentLaw} onChange={e=>setCurrentLaw(e.target.value)}/><div className="code-caption">Baseline law / policy / regulation</div></Card>
+          <Card title="Proposed or amended rule set" icon={Sparkles}><textarea className="editor kernel-editor" value={proposedLaw} onChange={e=>setProposedLaw(e.target.value)}/><div className="code-caption">Future law can be tested before its effective date</div></Card>
+        </div>
+        <div className="kernel-banner"><div><BrainCircuit/><span><b>This is the core shift.</b> LLM output is not the legal decision. Natural language is compiled into a deterministic, versioned rule layer that downstream systems can query.</span></div><span className="mono">LAW → NIR → EXECUTION</span></div>
+        {shadow&&<Card title="Compiled rule objects" icon={Code2}>
+          <table><thead><tr><th>ID</th><th>Modality</th><th>Actor</th><th>Executable object</th><th>Deadline</th><th>Evidence</th></tr></thead><tbody>
+          {shadow.proposed.rules.map(r=><tr key={r.id}><td className="mono">{r.id}</td><td><span className={"modality "+r.modality.toLowerCase()}>{r.modality}</span></td><td>{r.actor}</td><td>{r.object}</td><td>{r.deadline||"—"}</td><td>{r.evidence.join(", ")||"Derived at control layer"}</td></tr>)}
+          </tbody></table>
+          <div className="hashline"><Fingerprint size={14}/><span>Source fingerprint</span><code>{shadow.proposed.sourceHash}</code></div>
+        </Card>}
+      </div>}
+
+      {tab==="shadow"&&<div className="page">
+        <div className="section-head"><div><span className="eyebrow">PRE-EFFECTIVE-DATE REGULATORY SIMULATION</span><h2>Shadow Law Engine</h2><p>Run a proposed regulation against the enterprise before it becomes law. Synesis identifies changed legal objects, propagates them through contracts, controls, processes and systems, then computes a minimum remediation set.</p></div><button className="primary" onClick={runShadow} disabled={shadowBusy}>{shadowBusy?<Loader2 size={17} className="spin"/>:<RefreshCw size={17}/>} Re-run simulation</button></div>
+        {!shadow?<div className="empty"><FlaskConical size={38}/><h3>No shadow simulation yet</h3><p>Open Legal Compiler and run the default current/proposed rule sets.</p></div>:<>
+          <div className="metrics">
+            <Metric icon={Sparkles} value={String(shadow.delta.added.length)} label="New legal rules" note="Not present in current version"/>
+            <Metric icon={GitBranch} value={String(shadow.delta.modified.length)} label="Changed rules" note="Same legal function, new text"/>
+            <Metric icon={AlertTriangle} value={String(shadow.impact.impacts.length)} label="Enterprise impacts" note="Contracts + controls + processes"/>
+            <Metric icon={Gauge} value={String(shadow.impact.minimumChangeSet.length)} label="Minimum change set" note={"Effort index "+shadow.impact.totalEstimatedEffort}/>
+          </div>
+          <div className="grid two">
+            <Card title="Regulatory delta" icon={GitBranch}>
+              <div className="delta-list">{[...shadow.delta.added,...shadow.delta.modified].map((r,i)=><div className="delta" key={r.id+i}><span className={"modality "+r.modality.toLowerCase()}>{r.modality}</span><div><b>{r.actor}</b><p>{r.sourceText}</p><small>{r.deadline||"No explicit deadline"} · {r.exceptions.length?("Exception: "+r.exceptions.join("; ")):"No parsed exception"}</small></div></div>)}</div>
+            </Card>
+            <Card title="Minimum legally sufficient remediation" icon={Gauge}>
+              <p className="muted">Synesis optimises for the smallest set of enterprise changes that covers the changed rule set. This is not a generic task list.</p>
+              <div className="mcs-list">{shadow.impact.minimumChangeSet.map((x:any,i:number)=><div className="mcs" key={i}><span>{i+1}</span><div><b>{x.asset}</b><p>{x.remediation}</p><small>{x.type} · relevance {x.relevance}% · effort {x.cost}</small></div></div>)}</div>
+            </Card>
+          </div>
+          <Card title="Impact propagation graph" icon={Network}>
+            <table><thead><tr><th>Changed rule</th><th>Affected enterprise object</th><th>Type</th><th>Relevance</th><th>Gap</th><th>Remediation</th></tr></thead><tbody>
+            {shadow.impact.impacts.map((x:any,i:number)=><tr key={i}><td className="mono">{x.ruleId}</td><td><b>{x.asset}</b></td><td>{x.type}</td><td>{x.relevance}%</td><td>{x.gap}</td><td>{x.remediation}</td></tr>)}
+            </tbody></table>
+          </Card>
+        </>}
+      </div>}
+
+      {tab==="kernel"&&<div className="page">
+        <div className="section-head"><div><span className="eyebrow">MACHINE-VERIFIABLE LEGAL DECISION SERVICE</span><h2>Decision Kernel + Compliance Receipt</h2><p>Other software or AI agents can ask Synesis before taking an action. The response is not conversational advice: ALLOW, BLOCK or REVIEW plus the exact rule path, source version and cryptographic receipt.</p></div></div>
+        <div className="grid two">
+          <Card title="Proposed enterprise / AI action" icon={Fingerprint}>
+            <textarea className="editor kernel-editor" value={actionText} onChange={e=>setActionText(e.target.value)}/>
+            <label className="mini-label">Operational facts (semicolon separated)</label><textarea className="editor facts-editor" value={actionFacts} onChange={e=>setActionFacts(e.target.value)}/>
+            <button className="primary full" onClick={runDecision} disabled={decisionBusy}>{decisionBusy?<Loader2 size={17} className="spin"/>:<ShieldCheck size={17}/>} Ask the Synesis legal kernel</button>
+          </Card>
+          <Card title="Machine decision" icon={ShieldCheck}>
+            {!decision?<div className="empty compact"><Fingerprint size={34}/><h3>No receipt generated</h3><p>Run the proposed action through the legal kernel.</p></div>:<div className="receipt">
+              <div className={"decision "+decision.receipt.decision.toLowerCase()}>{decision.receipt.decision}</div>
+              <p>{decision.receipt.decision==="BLOCK"?"The proposed action intersects a compiled prohibition.":"The action requires the obligations below to be satisfied or reviewed before execution."}</p>
+              <div className="receipt-grid"><span>Rules applied<b>{decision.receipt.ruleIds.join(", ")||"None"}</b></span><span>Timestamp<b>{fmtDate(decision.receipt.timestamp)}</b></span></div>
+              <div className="receipt-hash"><Fingerprint size={16}/><div><span>Proof receipt SHA-256</span><code>{decision.receipt.receiptHash}</code></div></div>
+            </div>}
+          </Card>
+        </div>
+        {decision&&<Card title="Inspectable decision proof" icon={Network}>
+          <div className="delta-list">{decision.receipt.reasoning.map((x:any,i:number)=><div className="delta" key={i}><span className={"modality "+String(x.modality).toLowerCase()}>{x.modality}</span><div><b>{x.rule} · relevance {x.relevance}%</b><p>{x.source}</p></div></div>)}</div>
+          <div className="kernel-banner"><div><Fingerprint/><span><b>Licensable surface:</b> this kernel can sit behind a bank workflow, procurement system, payment rail, AI agent or CLM. They call the API; Synesis returns the legal decision and proof receipt.</span></div><span className="mono">ACTION → LEGAL GATE → RECEIPT</span></div>
+        </Card>}
+      </div>}
+
       {tab==="evidence"&&<div className="page">
         <div className="section-head"><div><span className="eyebrow">INVESTOR / DESIGN-PARTNER PROOF</span><h2>Pilot evidence pack</h2><p>Show what happened during the trial: documents analysed, risks surfaced, decisions made, actions closed and regulatory signals reviewed.</p></div><button className="primary" onClick={exportEvidence}><Download size={17}/> Export evidence JSON</button></div>
         <div className="metrics">
@@ -252,7 +350,7 @@ export default function Home(){
         </Card>
       </div>}
 
-      <footer><span>Synesis Pilot v2.0 · Explainable regulatory intelligence</span><span>Decision-support system — final legal conclusions remain subject to authorised review.</span></footer>
+      <footer><span>Synesis Pilot v3.0 · Legal Execution Kernel</span><span>Decision-support system — final legal conclusions remain subject to authorised review.</span></footer>
     </section>
   </main>;
 }
