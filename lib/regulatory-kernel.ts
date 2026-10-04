@@ -69,7 +69,7 @@ export function diffRules(oldRules:NormRule[],newRules:NormRule[]){
   const oldMap=new Map(oldRules.map(r=>[sig(r),r])), newMap=new Map(newRules.map(r=>[sig(r),r]));
   const added=newRules.filter(r=>!oldMap.has(sig(r)));
   const removed=oldRules.filter(r=>!newMap.has(sig(r)));
-  const modified:newRules[0][]=[];
+  const modified:NormRule[]=[];
   for(const r of newRules){const o=oldMap.get(sig(r)); if(o&&o.sourceText!==r.sourceText) modified.push(r);}
   return {added,removed,modified};
 }
