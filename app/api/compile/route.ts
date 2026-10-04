@@ -1,0 +1,2 @@
+import {NextResponse} from "next/server";import {compileRegulation} from "@/lib/regulatory-kernel";
+export async function POST(req:Request){const b=await req.json();const text=String(b.text||"").slice(0,120000);if(text.length<20)return NextResponse.json({error:"Regulatory text required"},{status:400});return NextResponse.json(compileRegulation(text,{jurisdiction:b.jurisdiction,sourceRef:b.sourceRef}));}
