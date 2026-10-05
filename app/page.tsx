@@ -193,6 +193,15 @@ export default function Home(){
           <div><span className="eyebrow">FROM LEGAL INFORMATION TO EXECUTABLE DECISIONS</span><h2>See what changed, which institutional objects it touches, what decision is permitted, and what evidence supports that decision.</h2><p>Synesis is evolving from document analysis into a legal decision runtime: source rules are compiled, changes are simulated against enterprise state, and proposed actions are evaluated with an inspectable decision trace.</p></div>
           <div className="score-ring"><div><b>{analysis.score}</b><span>Risk score</span></div></div>
         </div>
+        <div className="command-launcher">
+          <div><span className="eyebrow">ONE CONTROL PLANE</span><h3>What do you want Synesis to decide or test?</h3><p>Start with the action or change, not the module. Synesis routes the request to the relevant institutional state, legal rule and evidence trail.</p></div>
+          <div className="command-actions">
+            <button onClick={()=>setTab("kernel")}><Fingerprint size={17}/><span><b>Preflight an action</b><small>ALLOW · BLOCK · REVIEW</small></span></button>
+            <button onClick={()=>setTab("shadow")}><FlaskConical size={17}/><span><b>Simulate a change</b><small>Rule change → enterprise impact</small></span></button>
+            <button onClick={()=>setTab("analyze")}><FileSearch size={17}/><span><b>Analyse a document</b><small>Contract → obligation → action</small></span></button>
+            <button onClick={()=>setTab("radar")}><Landmark size={17}/><span><b>Scan regulation</b><small>Official source queue</small></span></button>
+          </div>
+        </div>
         <div className="metrics">
           <Metric icon={AlertTriangle} value={String(critical+high)} label="Priority issues" note={critical?critical+" critical":"No critical issues"}/>
           <Metric icon={Link2} value={String(findings.length)} label="Reasoning links" note="Clause → rule → action"/>
@@ -293,8 +302,13 @@ export default function Home(){
       </div>}
 
       {tab==="shadow"&&<div className="page">
-        <div className="section-head"><div><span className="eyebrow">PRE-EFFECTIVE-DATE REGULATORY SIMULATION</span><h2>Shadow Law Engine</h2><p>Run a proposed regulation against the enterprise before it becomes law. Synesis identifies changed legal objects, propagates them through contracts, controls, processes and systems, then computes a minimum remediation set.</p></div><button className="primary" onClick={runShadow} disabled={shadowBusy}>{shadowBusy?<Loader2 size={17} className="spin"/>:<RefreshCw size={17}/>} Re-run simulation</button></div>
-        {!shadow?<div className="empty"><FlaskConical size={38}/><h3>No shadow simulation yet</h3><p>Open Legal Compiler and run the default current/proposed rule sets.</p></div>:<>
+        <div className="section-head"><div><span className="eyebrow">COUNTERFACTUAL INSTITUTIONAL SIMULATION</span><h2>Simulate Change</h2><p>Change a regulation, policy or contractual rule and run it against the current institutional state before the real organisation changes.</p></div><button className="primary" onClick={runShadow} disabled={shadowBusy}>{shadowBusy?<Loader2 size={17} className="spin"/>:<RefreshCw size={17}/>} Compile + simulate</button></div>
+        <div className="grid two">
+          <Card title="Current rule state" icon={FileText}><textarea className="editor kernel-editor" value={currentLaw} onChange={e=>setCurrentLaw(e.target.value)}/></Card>
+          <Card title="Proposed / counterfactual state" icon={Sparkles}><textarea className="editor kernel-editor" value={proposedLaw} onChange={e=>setProposedLaw(e.target.value)}/></Card>
+        </div>
+        <div className="simulation-context"><span><Building2 size={15}/> {enterpriseAssets.length} institutional objects loaded</span><button className="ghost" onClick={()=>setTab("state")}>Edit institutional state</button><button className="ghost" onClick={()=>setTab("compiler")}>Inspect compiled rules</button></div>
+        {!shadow?<div className="empty"><FlaskConical size={38}/><h3>Ready for counterfactual simulation</h3><p>Run the two rule states above against the institutional state.</p></div>:<>
           <div className="metrics">
             <Metric icon={Sparkles} value={String(shadow.delta.added.length)} label="New legal rules" note="Not present in current version"/>
             <Metric icon={GitBranch} value={String(shadow.delta.modified.length)} label="Changed rules" note="Same legal function, new text"/>
