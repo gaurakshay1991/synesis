@@ -12,3 +12,7 @@
 .state-actions,.simulation-context,.workbench-links{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.simulation-context{padding:10px 12px;background:#0a1623;border:1px solid #1d3146;border-radius:11px}.simulation-context>span{margin-right:auto;display:flex;align-items:center;gap:7px;color:#91a6bc;font-size:10px}
 @media(max-width:900px){.command-launcher{grid-template-columns:1fr}.state-grid{grid-template-columns:1fr}}
 @media(max-width:760px){.command-actions{grid-template-columns:1fr}}
+
+.fact-legend{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.fact-legend span{font-size:8px;text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;border-radius:999px;border:1px solid #31465d;color:#8da1b6}
+.fact-legend .verified{color:#aef2d5;border-color:#265c4c;background:#102d24}.fact-legend .derived{color:#b8cfff;border-color:#36527a;background:#14253a}.fact-legend .assumed{color:#f6dea2;border-color:#65501e;background:#302714}.fact-legend .missing{color:#ffb8b8;border-color:#762731;background:#3c171b}.fact-legend .conflicting{color:#ffc7e9;border-color:#70335d;background:#35192d}
+.uncertainty-box,.assumption-box{margin:12px 0;padding:10px;border-radius:9px;text-align:left;display:flex;flex-direction:column;gap:5px;font-size:10px}.uncertainty-box{background:#32171c;border:1px solid #6c2730;color:#e7b5bb}.assumption-box{background:#2c2515;border:1px solid #5c4b1f;color:#e5d39a}.uncertainty-box b,.assumption-box b{color:#fff;font-size:10px}.uncertainty-box span,.assumption-box span{display:block}
