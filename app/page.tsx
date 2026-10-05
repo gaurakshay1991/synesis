@@ -32,11 +32,11 @@ const seedAnalysis:Analysis={
 };
 
 const tabs=[
-  ["dashboard","Executive",BarChart3],
-  ["analyze","Analyse",FileSearch],
-  ["graph","Risk Graph",Network],
-  ["obligations","Obligations",ListChecks],
-  ["radar","Regulatory Radar",Landmark],
+  ["dashboard","Command Center",BarChart3],
+  ["analyze","Document Workbench",FileSearch],
+  ["graph","Reasoning Trace",Network],
+  ["obligations","Control Queue",ListChecks],
+  ["radar","Regulatory Intelligence",Landmark],
   ["compiler","Legal Compiler",Code2],
   ["shadow","Shadow Law",FlaskConical],
   ["kernel","Decision Kernel",Fingerprint],
@@ -179,7 +179,7 @@ export default function Home(){
 
       {tab==="dashboard"&&<div className="page">
         <div className="hero">
-          <div><span className="eyebrow">FROM STATIC CONTRACTS TO LIVE CONTROL</span><h2>Know what changed, what it affects, who owns it, and what must happen next.</h2><p>Synesis links contract language to obligations, regulatory context, risk, ownership and evidence—then keeps the decision trail explainable.</p></div>
+          <div><span className="eyebrow">FROM LEGAL INFORMATION TO EXECUTABLE DECISIONS</span><h2>See what changed, which institutional objects it touches, what decision is permitted, and what evidence supports that decision.</h2><p>Synesis is evolving from document analysis into a legal decision runtime: source rules are compiled, changes are simulated against enterprise state, and proposed actions are evaluated with an inspectable decision trace.</p></div>
           <div className="score-ring"><div><b>{analysis.score}</b><span>Risk score</span></div></div>
         </div>
         <div className="metrics">
@@ -226,7 +226,7 @@ export default function Home(){
       </div>}
 
       {tab==="graph"&&<div className="page">
-        <div className="section-head"><div><span className="eyebrow">NEURO-SYMBOLIC REASONING VIEW</span><h2>{analysis.document}</h2><p>{analysis.summary}</p></div><span className={riskClass(analysis.overallRisk)}>{analysis.overallRisk} · {analysis.score}</span></div>
+        <div className="section-head"><div><span className="eyebrow">EXPLAINABLE REASONING TRACE</span><h2>{analysis.document}</h2><p>{analysis.summary}</p></div><span className={riskClass(analysis.overallRisk)}>{analysis.overallRisk} · {analysis.score}</span></div>
         <div className="graph-list">{graphRows.map(({f,status})=><div className="graph-card" key={f.id}>
           <div className="graph-top"><div><span className="finding-id">{f.id}</span><h3>{f.clause}</h3></div><span className={riskClass(f.risk)}>{f.risk} · {f.score}</span></div>
           <div className="reasoning-path">
@@ -282,8 +282,8 @@ export default function Home(){
             <Card title="Regulatory delta" icon={GitBranch}>
               <div className="delta-list">{[...shadow.delta.added,...shadow.delta.modified].map((r,i)=><div className="delta" key={r.id+i}><span className={"modality "+r.modality.toLowerCase()}>{r.modality}</span><div><b>{r.actor}</b><p>{r.sourceText}</p><small>{r.deadline||"No explicit deadline"} · {r.exceptions.length?("Exception: "+r.exceptions.join("; ")):"No parsed exception"}</small></div></div>)}</div>
             </Card>
-            <Card title="Minimum legally sufficient remediation" icon={Gauge}>
-              <p className="muted">Synesis optimises for the smallest set of enterprise changes that covers the changed rule set. This is not a generic task list.</p>
+            <Card title="Candidate minimum remediation set" icon={Gauge}>
+              <p className="muted">Synesis uses a multi-rule set-cover heuristic to propose a compact remediation candidate. It is a decision-support calculation, not a legal sufficiency determination.</p>
               <div className="mcs-list">{shadow.impact.minimumChangeSet.map((x:any,i:number)=><div className="mcs" key={i}><span>{i+1}</span><div><b>{x.asset}</b><p>{x.remediation}</p><small>{x.type} · relevance {x.relevance}% · effort {x.cost}</small></div></div>)}</div>
             </Card>
           </div>
@@ -296,7 +296,7 @@ export default function Home(){
       </div>}
 
       {tab==="kernel"&&<div className="page">
-        <div className="section-head"><div><span className="eyebrow">MACHINE-VERIFIABLE LEGAL DECISION SERVICE</span><h2>Decision Kernel + Compliance Receipt</h2><p>Other software or AI agents can ask Synesis before taking an action. The response is not conversational advice: ALLOW, BLOCK or REVIEW plus the exact rule path, source version and cryptographic receipt.</p></div></div>
+        <div className="section-head"><div><span className="eyebrow">REPLAYABLE POLICY DECISION PROTOTYPE</span><h2>Decision Kernel + Compliance Receipt</h2><p>Other software or AI agents can ask Synesis before taking an action. The response is not conversational advice: ALLOW, BLOCK or REVIEW plus the applied rule path, source fingerprint and replayable decision record.</p></div></div>
         <div className="grid two">
           <Card title="Proposed enterprise / AI action" icon={Fingerprint}>
             <textarea className="editor kernel-editor" value={actionText} onChange={e=>setActionText(e.target.value)}/>
@@ -308,13 +308,13 @@ export default function Home(){
               <div className={"decision "+decision.receipt.decision.toLowerCase()}>{decision.receipt.decision}</div>
               <p>{decision.receipt.decision==="BLOCK"?"The proposed action intersects a compiled prohibition.":"The action requires the obligations below to be satisfied or reviewed before execution."}</p>
               <div className="receipt-grid"><span>Rules applied<b>{decision.receipt.ruleIds.join(", ")||"None"}</b></span><span>Timestamp<b>{fmtDate(decision.receipt.timestamp)}</b></span></div>
-              <div className="receipt-hash"><Fingerprint size={16}/><div><span>Proof receipt SHA-256</span><code>{decision.receipt.receiptHash}</code></div></div>
+              <div className="receipt-hash"><Fingerprint size={16}/><div><span>Decision receipt fingerprint · SHA-256</span><code>{decision.receipt.receiptHash}</code></div></div>
             </div>}
           </Card>
         </div>
         {decision&&<Card title="Inspectable decision proof" icon={Network}>
           <div className="delta-list">{decision.receipt.reasoning.map((x:any,i:number)=><div className="delta" key={i}><span className={"modality "+String(x.modality).toLowerCase()}>{x.modality}</span><div><b>{x.rule} · relevance {x.relevance}%</b><p>{x.source}</p></div></div>)}</div>
-          <div className="kernel-banner"><div><Fingerprint/><span><b>Licensable surface:</b> this kernel can sit behind a bank workflow, procurement system, payment rail, AI agent or CLM. They call the API; Synesis returns the legal decision and proof receipt.</span></div><span className="mono">ACTION → LEGAL GATE → RECEIPT</span></div>
+          <div className="kernel-banner"><div><Fingerprint/><span><b>Licensable surface:</b> this kernel can sit behind a bank workflow, procurement system, payment rail, AI agent or CLM. They call the API; Synesis returns a policy decision, applied-rule trace and tamper-evident receipt fingerprint.</span></div><span className="mono">ACTION → LEGAL GATE → RECEIPT</span></div>
         </Card>}
       </div>}
 
