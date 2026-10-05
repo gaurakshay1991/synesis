@@ -17,6 +17,7 @@ type RegItem={source:string;title:string;link:string;date:string;summary:string}
 type NormRule={id:string;modality:string;actor:string;action:string;object:string;trigger:string;deadline:string|null;exceptions:string[];evidence:string[];jurisdiction:string;sourceRef:string;sourceText:string;sourceHash:string;confidence:number};
 type ShadowResult={current:{rules:NormRule[];sourceHash:string};proposed:{rules:NormRule[];sourceHash:string};delta:{added:NormRule[];removed:NormRule[];modified:NormRule[]};impact:{impacts:any[];minimumChangeSet:any[];totalEstimatedEffort:number};assets:any[];simulatedAt:string};
 type DecisionResult={compiledRules:NormRule[];receipt:{decision:"ALLOW"|"BLOCK"|"REVIEW";action:string;facts:string[];ruleIds:string[];sourceHashes:string[];timestamp:string;receiptHash:string;reasoning:any[]}};
+type EnterpriseAsset={id:string;type:"contract"|"control"|"process"|"system";name:string;facts:string[];cost:number};
 
 const seedAnalysis:Analysis={
   document:"Sample Technology Services Agreement",
@@ -34,14 +35,16 @@ const seedAnalysis:Analysis={
 const tabs=[
   ["dashboard","Command Center",BarChart3],
   ["analyze","Document Workbench",FileSearch],
+  ["state","Institutional State",Building2],
   ["graph","Reasoning Trace",Network],
   ["obligations","Control Queue",ListChecks],
   ["radar","Regulatory Intelligence",Landmark],
   ["compiler","Legal Compiler",Code2],
-  ["shadow","Shadow Law",FlaskConical],
-  ["kernel","Decision Kernel",Fingerprint],
-  ["evidence","Pilot Evidence",BadgeCheck],
+  ["shadow","Simulate Change",FlaskConical],
+  ["kernel","Decision Gate",Fingerprint],
+  ["evidence","Evidence & Proof",BadgeCheck],
 ] as const;
+const primaryTabs=new Set(["dashboard","analyze","state","shadow","kernel","evidence"]);
 
 function riskClass(r:string){return "risk "+r.toLowerCase();}
 function fmtDate(v:string){if(!v)return "—"; const d=new Date(v); return Number.isNaN(d.getTime())?v:d.toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});}
@@ -62,6 +65,13 @@ export default function Home(){
   const [pilotStart,setPilotStart]=useState("");
   const [currentLaw,setCurrentLaw]=useState("A regulated entity shall maintain an inventory of material outsourced service providers and shall retain audit records. A service provider must notify the regulated entity of a material security incident within 72 hours. The regulated entity may appoint a material subcontractor where appropriate due diligence has been completed.");
   const [proposedLaw,setProposedLaw]=useState("A regulated entity shall maintain a continuously updated inventory of material outsourced service providers and shall retain machine-verifiable audit evidence. A service provider must notify the regulated entity of a material security incident within 24 hours. A regulated entity must not permit appointment of a material subcontractor unless prior risk assessment, approval and contractual flow-down controls are recorded. The regulated entity shall test material outsourcing exit arrangements at least annually.");
+  const [enterpriseAssets,setEnterpriseAssets]=useState<EnterpriseAsset[]>([
+    {id:"C1",type:"contract",name:"Cloud Outsourcing MSA",facts:["vendor processes customer data","subcontractors require governance","audit rights and breach notification apply"],cost:3},
+    {id:"C2",type:"contract",name:"Payment Aggregator Agreement",facts:["customer funds","payment processing","transaction data","incident notification","audit access"],cost:4},
+    {id:"CTRL1",type:"control",name:"Third-Party Risk Control",facts:["due diligence","subcontractor register","annual audit","risk assessment"],cost:2},
+    {id:"P1",type:"process",name:"Incident Response",facts:["security incident","breach notification","escalation","regulator notification"],cost:2},
+    {id:"S1",type:"system",name:"Vendor Access Gateway",facts:["third-party privileged access","logs","approval","data access"],cost:5}
+  ]);
   const [shadow,setShadow]=useState<ShadowResult|null>(null);
   const [shadowBusy,setShadowBusy]=useState(false);
   const [actionText,setActionText]=useState("Approve a new cloud subcontractor to process customer transaction data before the risk assessment is completed.");
@@ -78,6 +88,7 @@ export default function Home(){
         if(s.workspace) setWorkspace(s.workspace);
         if(s.actions) setActions(s.actions);
         if(s.pilotStart) setPilotStart(s.pilotStart);
+        if(Array.isArray(s.enterpriseAssets)&&s.enterpriseAssets.length) setEnterpriseAssets(s.enterpriseAssets);
       }else{
         setPilotStart(new Date().toISOString());
       }
@@ -85,8 +96,8 @@ export default function Home(){
   },[]);
   useEffect(()=>{
     if(!pilotStart)return;
-    localStorage.setItem("synesis-pilot-v2",JSON.stringify({analysis,workspace,actions,pilotStart}));
-  },[analysis,workspace,actions,pilotStart]);
+    localStorage.setItem("synesis-pilot-v2",JSON.stringify({analysis,workspace,actions,pilotStart,enterpriseAssets}));
+  },[analysis,workspace,actions,pilotStart,enterpriseAssets]);
 
   const findings=analysis.findings||[];
   const critical=findings.filter(x=>x.risk==="Critical").length;
@@ -133,7 +144,7 @@ export default function Home(){
   async function runShadow(){
     setShadowBusy(true); setMessage("");
     try{
-      const r=await fetch("/api/shadow",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({currentText:currentLaw,proposedText:proposedLaw,jurisdiction:"India / BFSI"})});
+      const r=await fetch("/api/shadow",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({currentText:currentLaw,proposedText:proposedLaw,jurisdiction:"India / BFSI",assets:enterpriseAssets})});
       const j=await r.json(); if(!r.ok) throw new Error(j.error||"Simulation failed");
       setShadow(j); setTab("shadow");
     }catch(e:any){setMessage(e.message||"Simulation failed");}
@@ -162,7 +173,7 @@ export default function Home(){
     <aside className="sidebar">
       <div className="brand"><div className="brandmark"><BrainCircuit size={21}/></div><div><strong>SYNESIS</strong><span>Regulatory Risk Intelligence</span></div></div>
       <div className="pilot-chip"><CircleDot size={13}/> LIVE PILOT</div>
-      <nav>{tabs.map(([id,label,Icon])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}><Icon size={18}/><span>{label}</span></button>)}</nav>
+      <nav>{tabs.filter(([id])=>primaryTabs.has(id)).map(([id,label,Icon])=><button key={id} className={tab===id?"active":""} onClick={()=>setTab(id)}><Icon size={18}/><span>{label}</span></button>)}</nav>
       <div className="side-card">
         <span>Pilot workspace</span>
         <input value={workspace.organisation} onChange={e=>setWorkspace({...workspace,organisation:e.target.value})}/>
