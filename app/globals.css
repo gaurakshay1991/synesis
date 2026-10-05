@@ -16,3 +16,15 @@
 .fact-legend{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.fact-legend span{font-size:8px;text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;border-radius:999px;border:1px solid #31465d;color:#8da1b6}
 .fact-legend .verified{color:#aef2d5;border-color:#265c4c;background:#102d24}.fact-legend .derived{color:#b8cfff;border-color:#36527a;background:#14253a}.fact-legend .assumed{color:#f6dea2;border-color:#65501e;background:#302714}.fact-legend .missing{color:#ffb8b8;border-color:#762731;background:#3c171b}.fact-legend .conflicting{color:#ffc7e9;border-color:#70335d;background:#35192d}
 .uncertainty-box,.assumption-box{margin:12px 0;padding:10px;border-radius:9px;text-align:left;display:flex;flex-direction:column;gap:5px;font-size:10px}.uncertainty-box{background:#32171c;border:1px solid #6c2730;color:#e7b5bb}.assumption-box{background:#2c2515;border:1px solid #5c4b1f;color:#e5d39a}.uncertainty-box b,.assumption-box b{color:#fff;font-size:10px}.uncertainty-box span,.assumption-box span{display:block}
+
+/* 2026 UX pass: improve readability and reduce "dense demo dashboard" feel */
+.sidebar nav button{font-size:12px}
+.card-head span{font-size:13px}
+.metric span{font-size:13px}.metric small{font-size:11px}
+.eyebrow{font-size:10px}
+th{font-size:10px}td{font-size:12px}
+.node span{font-size:10px}.node p{font-size:11px}
+.rationale,.ownerline,.reg-list p,.checklist li,.kpi span{font-size:11px}
+.reg-list h3{font-size:13px}
+.mini-label{font-size:10px}
+footer{font-size:10px}
