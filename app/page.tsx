@@ -46,11 +46,12 @@ const seedCases:Case[]=[
 const currentLaw="A regulated entity shall maintain an inventory of material outsourced service providers and shall retain audit records. A service provider must notify the regulated entity of a material security incident within 72 hours. The regulated entity may appoint a material subcontractor where appropriate due diligence has been completed.";
 const proposedLaw="A regulated entity shall maintain a continuously updated inventory of material outsourced service providers and shall retain machine-verifiable audit evidence. A service provider must notify the regulated entity of a material security incident within 24 hours. A regulated entity must not permit appointment of a material subcontractor unless prior risk assessment, approval and contractual flow-down controls are recorded. The regulated entity shall test material outsourcing exit arrangements at least annually.";
 
-const navGroups=[
+type NavItem=[string,string,any];
+const navGroups:{label:string;items:NavItem[]}[]=[
   {label:"Operate",items:[["command","Command Center",Sparkles],["queue","Work Queue",ListChecks]]},
   {label:"Understand",items:[["state","Institutional State",Building2],["changes","Change Intelligence",Landmark],["documents","Document Review",FileSearch],["cases","Cases & KYC",UserCheck]]},
   {label:"Decide",items:[["simulate","Simulate",FlaskConical],["decision","Decision Gate",Fingerprint],["evidence","Evidence Journal",BadgeCheck]]}
-] as const;
+];
 
 function riskClass(v:string){return "pill "+v.toLowerCase().replace(/\s+/g,"-");}
 function nowId(prefix:string){return prefix+"-"+Date.now().toString(36);}
