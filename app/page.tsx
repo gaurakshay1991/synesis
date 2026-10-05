@@ -236,6 +236,18 @@ export default function Home(){
         <div className="trust-row"><ShieldCheck/><div><b>Explainability first</b><span>Synesis distinguishes a detected issue from its regulatory context and from the recommended business action.</span></div></div>
       </div>}
 
+      {tab==="state"&&<div className="page">
+        <div className="section-head"><div><span className="eyebrow">THE ORGANISATION AS MACHINE-READABLE STATE</span><h2>Institutional State</h2><p>These are the enterprise objects against which Synesis tests regulatory change. Add the real contracts, controls, processes and systems that define the organisation.</p></div><span className="state-count">{enterpriseAssets.length} objects</span></div>
+        <div className="state-grid">{enterpriseAssets.map((a,i)=><div className="state-card" key={a.id}>
+          <div className="state-card-top"><select value={a.type} onChange={e=>{const n=[...enterpriseAssets];n[i]={...a,type:e.target.value as EnterpriseAsset["type"]};setEnterpriseAssets(n)}}><option value="contract">Contract</option><option value="control">Control</option><option value="process">Process</option><option value="system">System</option></select><code>{a.id}</code></div>
+          <input className="field" value={a.name} onChange={e=>{const n=[...enterpriseAssets];n[i]={...a,name:e.target.value};setEnterpriseAssets(n)}}/>
+          <textarea className="state-facts" value={a.facts.join("; ")} onChange={e=>{const n=[...enterpriseAssets];n[i]={...a,facts:e.target.value.split(";").map(x=>x.trim()).filter(Boolean)};setEnterpriseAssets(n)}}/>
+          <div className="state-cost"><span>Change effort</span><input type="number" min="1" max="10" value={a.cost} onChange={e=>{const n=[...enterpriseAssets];n[i]={...a,cost:Math.max(1,Number(e.target.value)||1)};setEnterpriseAssets(n)}}/><button onClick={()=>setEnterpriseAssets(enterpriseAssets.filter((_,x)=>x!==i))}>Remove</button></div>
+        </div>)}</div>
+        <div className="state-actions"><button className="ghost" onClick={()=>setEnterpriseAssets([...enterpriseAssets,{id:`A${enterpriseAssets.length+1}`,type:"control",name:"New institutional object",facts:["Describe the facts Synesis should reason over"],cost:2}])}>+ Add enterprise object</button><button className="primary" onClick={()=>setTab("shadow")}><FlaskConical size={16}/> Test change against this state</button></div>
+        <div className="kernel-banner"><div><Database/><span><b>Shared reasoning substrate:</b> the same institutional state can drive regulatory simulation, contract impact and pre-action decisions.</span></div><span className="mono">STATE → RULE → ACTION</span></div>
+      </div>}
+
       {tab==="graph"&&<div className="page">
         <div className="section-head"><div><span className="eyebrow">EXPLAINABLE REASONING TRACE</span><h2>{analysis.document}</h2><p>{analysis.summary}</p></div><span className={riskClass(analysis.overallRisk)}>{analysis.overallRisk} · {analysis.score}</span></div>
         <div className="graph-list">{graphRows.map(({f,status})=><div className="graph-card" key={f.id}>
