@@ -231,7 +231,7 @@ export default function InstitutionalOS(){
         </div>
 
         <Panel title="Recent decision trail" icon={Activity}>
-          {audit.length?<div className="auditList">{audit.slice(0,5).map(a=><div key={a.id}><span>{fmt(a.time)}</span><b>{a.title}</b><small>{a.detail}</small></div>)}</div>:<Empty title="No recorded decisions yet" text="Run a simulation, document review, case decision or Decision Gate preflight."/ >}
+          {audit.length?<div className="auditList">{audit.slice(0,5).map(a=><div key={a.id}><span>{fmt(a.time)}</span><b>{a.title}</b><small>{a.detail}</small></div>)}</div>:<Empty title="No recorded decisions yet" text="Run a simulation, document review, case decision or Decision Gate preflight."/>}
         </Panel>
       </div>}
 
@@ -315,7 +315,7 @@ export default function InstitutionalOS(){
 
       {tab==="evidence"&&<div className="page">
         <Head eyebrow="REPLAYABLE INSTITUTIONAL MEMORY" title="Evidence Journal" text="Every simulation, machine preflight, case action and human decision can be recorded separately. Export produces a pilot evidence package, not a claim of legal proof." action={<button className="primary" onClick={exportJournal}><Download size={15}/> Export JSON</button>}/>
-        <div className="journal">{audit.length?audit.map(a=><div key={a.id}><div className="dot"/><span>{fmt(a.time)}</span><div><b>{a.title}</b><p>{a.detail}</p><small>{a.type} · {a.id}</small></div></div>):<Empty title="Journal is empty" text="Use the product and decisions will appear here."/ >}</div>
+        <div className="journal">{audit.length?audit.map(a=><div key={a.id}><div className="dot"/><span>{fmt(a.time)}</span><div><b>{a.title}</b><p>{a.detail}</p><small>{a.type} · {a.id}</small></div></div>):<Empty title="Journal is empty" text="Use the product and decisions will appear here."/>}</div>
       </div>}
 
       <footer><span>Institutional OS · fusion pilot</span><span>Separate prototype derived from the strongest SNEH workflow patterns and Synesis decision-runtime architecture.</span></footer>
