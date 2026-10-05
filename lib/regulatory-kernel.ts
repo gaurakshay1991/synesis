@@ -7,7 +7,7 @@ export type NormRule={
   jurisdiction:string; sourceRef:string; sourceText:string; sourceHash:string; confidence:number;
   logicalForm:string;
 };
-export type EnterpriseAsset={id:string;type:"contract"|"control"|"process"|"system";name:string;facts:string[];cost:number};
+export type EnterpriseAsset={id:string;type:"contract"|"control"|"policy"|"process"|"system"|"vendor"|"product"|"entity"|"person"|"authority"|"evidence";name:string;facts:string[];cost:number};
 
 const sentenceSplit=(s:string)=>s.replace(/\s+/g," ").split(/(?<=[.;!?])\s+/).map(x=>x.trim()).filter(x=>x.length>20);
 const MODAL=/\b(shall not|must not|may not|is prohibited from|shall|must|required to|is required to|has to|may|is permitted to|can|should)\b/ig;
@@ -123,8 +123,14 @@ export function impactAndRemediate(changed:NormRule[], assets:EnterpriseAsset[])
         cost:a.cost,
         remediation:a.type==="contract"?"Review and amend the affected clause; add explicit covenant, evidence and flow-down where required":
           a.type==="control"?"Update the control objective, test procedure and required evidence":
+          a.type==="policy"?"Update the policy rule, approval authority and implementation evidence":
           a.type==="process"?"Change the operating step, approval gate and retained evidence":
-          "Update the system guardrail, validation rule and event evidence"
+          a.type==="system"?"Update the system guardrail, validation rule and event evidence":
+          a.type==="vendor"?"Reassess the vendor, contractual flow-down and monitoring evidence":
+          a.type==="product"?"Change product eligibility, disclosures, controls or operating conditions":
+          a.type==="entity"?"Review entity-level applicability, licence perimeter and governance approvals":
+          a.type==="person"||a.type==="authority"?"Revalidate authority, delegation and approval conditions":
+          "Refresh or obtain the evidence required to establish the regulated state"
       });
     }
   }
