@@ -153,15 +153,45 @@ export function impactAndRemediate(changed:NormRule[], assets:EnterpriseAsset[])
     method:"greedy multi-rule set-cover heuristic"
   };
 }
+type FactStatus="VERIFIED"|"DERIVED"|"ASSUMED"|"MISSING"|"CONFLICTING"|"UNVERIFIED";
+function parseFactAssertion(raw:string){
+  const m=raw.trim().match(/^\[(verified|derived|assumed|missing|conflicting|unverified)\]\s*(.+)$/i);
+  const status=(m?.[1]?.toUpperCase()||"UNVERIFIED") as FactStatus;
+  return {status,text:(m?.[2]||raw).trim()};
+}
 export function decisionReceipt(action:string,facts:string[],rules:NormRule[]){
-  const context=action+" "+facts.join(" ");
+  const assertions=facts.map(parseFactAssertion).filter(x=>x.text);
+  const usableFacts=assertions.filter(x=>!["MISSING","CONFLICTING"].includes(x.status)).map(x=>x.text);
+  const context=action+" "+assertions.map(x=>x.text).join(" ");
   const relevant=rules.map(r=>({r,score:overlap(context,r.sourceText+" "+r.object)})).filter(x=>x.score>.07).sort((a,b)=>b.score-a.score).slice(0,10);
+
+  const criticalUncertainty=assertions.filter(a=>["MISSING","CONFLICTING"].includes(a.status)&&relevant.some(x=>overlap(a.text,x.r.sourceText+" "+x.r.object)>.05));
+  const assumedRelevant=assertions.filter(a=>a.status==="ASSUMED"&&relevant.some(x=>overlap(a.text,x.r.sourceText+" "+x.r.object)>.05));
+
   let decision:"ALLOW"|"BLOCK"|"REVIEW"="ALLOW";
+  let stateStatus:"SUFFICIENT"|"INSUFFICIENT_STATE"|"ASSUMPTION_DEPENDENT"="SUFFICIENT";
   const blocking=relevant.filter(x=>x.r.modality==="PROHIBITION"&&x.score>.16);
-  if(blocking.length) decision="BLOCK";
-  else if(relevant.some(x=>["OBLIGATION","DISCRETION"].includes(x.r.modality))) decision="REVIEW";
-  const missingEvidence=[...new Set(relevant.flatMap(x=>x.r.evidence))].filter(e=>!facts.some(f=>overlap(f,e)>.2));
-  const payload={decision,action,facts,ruleIds:relevant.map(x=>x.r.id),sourceHashes:[...new Set(relevant.map(x=>x.r.sourceHash))],missingEvidence,timestamp:new Date().toISOString()};
+
+  if(criticalUncertainty.length){
+    decision="REVIEW";
+    stateStatus="INSUFFICIENT_STATE";
+  }else if(blocking.length){
+    decision="BLOCK";
+  }else if(relevant.some(x=>["OBLIGATION","DISCRETION"].includes(x.r.modality))){
+    decision="REVIEW";
+  }
+  if(stateStatus==="SUFFICIENT"&&assumedRelevant.length) stateStatus="ASSUMPTION_DEPENDENT";
+
+  const missingEvidence=[...new Set(relevant.flatMap(x=>x.r.evidence))].filter(e=>!usableFacts.some(f=>overlap(f,e)>.2));
+  const provenanceSummary=assertions.reduce((acc:any,a)=>{acc[a.status]=(acc[a.status]||0)+1;return acc;},{});
+  const payload={
+    decision,stateStatus,action,facts,assertions,provenanceSummary,
+    blockingFacts:criticalUncertainty.map(x=>x.text),
+    assumptionFacts:assumedRelevant.map(x=>x.text),
+    ruleIds:relevant.map(x=>x.r.id),
+    sourceHashes:[...new Set(relevant.map(x=>x.r.sourceHash))],
+    missingEvidence,timestamp:new Date().toISOString()
+  };
   const receiptHash=crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
   return {...payload,receiptHash,receiptType:"tamper-evident decision fingerprint",reasoning:relevant.map(x=>({rule:x.r.id,modality:x.r.modality,source:x.r.sourceText,logicalForm:x.r.logicalForm,relevance:Math.round(x.score*100)}))};
 }
