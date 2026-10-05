@@ -191,7 +191,7 @@ export default function Home(){
       {tab==="dashboard"&&<div className="page">
         <div className="hero">
           <div><span className="eyebrow">FROM LEGAL INFORMATION TO EXECUTABLE DECISIONS</span><h2>See what changed, which institutional objects it touches, what decision is permitted, and what evidence supports that decision.</h2><p>Synesis is evolving from document analysis into a legal decision runtime: source rules are compiled, changes are simulated against enterprise state, and proposed actions are evaluated with an inspectable decision trace.</p></div>
-          <div className="score-ring"><div><b>{analysis.score}</b><span>Risk score</span></div></div>
+          <div className="score-ring"><div><b>{enterpriseAssets.length}</b><span>State objects</span></div></div>
         </div>
         <div className="command-launcher">
           <div><span className="eyebrow">ONE CONTROL PLANE</span><h3>What do you want Synesis to decide or test?</h3><p>Start with the action or change, not the module. Synesis routes the request to the relevant institutional state, legal rule and evidence trail.</p></div>
@@ -203,13 +203,13 @@ export default function Home(){
           </div>
         </div>
         <div className="metrics">
-          <Metric icon={AlertTriangle} value={String(critical+high)} label="Priority issues" note={critical?critical+" critical":"No critical issues"}/>
-          <Metric icon={Link2} value={String(findings.length)} label="Reasoning links" note="Clause → rule → action"/>
-          <Metric icon={ListChecks} value={String(open)} label="Open obligations" note={done+" closed in pilot"}/>
-          <Metric icon={Activity} value={analysis.engine?.includes("AI")?"AI":"Rules"} label="Active engine" note="Fallback-safe analysis"/>
+          <Metric icon={Building2} value={String(enterpriseAssets.length)} label="Institutional objects" note="Contracts · controls · processes · systems"/>
+          <Metric icon={GitBranch} value={String(shadow?(shadow.delta.added.length+shadow.delta.modified.length):0)} label="Changed legal rules" note={shadow?"From latest simulation":"Run a counterfactual simulation"}/>
+          <Metric icon={ShieldCheck} value={decision?.receipt.decision||"—"} label="Latest machine decision" note={decision?.receipt.stateStatus||"No preflight run yet"}/>
+          <Metric icon={AlertTriangle} value={String(decision?.receipt.missingEvidence?.length||0)} label="Evidence gaps" note={decision?"From latest Decision Gate":"Decision evidence not evaluated"}/>
         </div>
         <div className="grid two">
-          <Card title="Decision brief" icon={Sparkles}>
+          <Card title="Latest document intelligence" icon={Sparkles}>
             <div className="brief"><div className={riskClass(analysis.overallRisk)}>{analysis.overallRisk}</div><h3>{analysis.document}</h3><p>{analysis.summary}</p>
             {top&&<div className="callout"><b>Highest priority</b><span>{top.clause}: {top.action}</span></div>}</div>
           </Card>
