@@ -16,7 +16,7 @@ type Analysis={document:string;overallRisk:string;score:number;summary:string;fi
 type RegItem={source:string;title:string;link:string;date:string;summary:string};
 type NormRule={id:string;modality:string;actor:string;action:string;object:string;trigger:string;deadline:string|null;exceptions:string[];evidence:string[];jurisdiction:string;sourceRef:string;sourceText:string;sourceHash:string;confidence:number};
 type ShadowResult={current:{rules:NormRule[];sourceHash:string};proposed:{rules:NormRule[];sourceHash:string};delta:{added:NormRule[];removed:NormRule[];modified:NormRule[]};impact:{impacts:any[];minimumChangeSet:any[];totalEstimatedEffort:number};assets:any[];simulatedAt:string};
-type DecisionResult={compiledRules:NormRule[];receipt:{decision:"ALLOW"|"BLOCK"|"REVIEW";action:string;facts:string[];ruleIds:string[];sourceHashes:string[];timestamp:string;receiptHash:string;reasoning:any[]}};
+type DecisionResult={compiledRules:NormRule[];receipt:{decision:"ALLOW"|"BLOCK"|"REVIEW";stateStatus?:"SUFFICIENT"|"INSUFFICIENT_STATE"|"ASSUMPTION_DEPENDENT";action:string;facts:string[];assertions?:Array<{status:string;text:string}>;provenanceSummary?:Record<string,number>;blockingFacts?:string[];assumptionFacts?:string[];missingEvidence?:string[];ruleIds:string[];sourceHashes:string[];timestamp:string;receiptHash:string;reasoning:any[]}};
 type EnterpriseAsset={id:string;type:"contract"|"control"|"process"|"system";name:string;facts:string[];cost:number};
 
 const seedAnalysis:Analysis={
@@ -75,7 +75,7 @@ export default function Home(){
   const [shadow,setShadow]=useState<ShadowResult|null>(null);
   const [shadowBusy,setShadowBusy]=useState(false);
   const [actionText,setActionText]=useState("Approve a new cloud subcontractor to process customer transaction data before the risk assessment is completed.");
-  const [actionFacts,setActionFacts]=useState("Material outsourcing; customer transaction data; subcontractor approval pending; risk assessment incomplete.");
+  const [actionFacts,setActionFacts]=useState("[verified] Material outsourcing; [verified] Customer transaction data involved; [missing] Subcontractor approval evidence; [missing] Completed risk assessment.");
   const [decision,setDecision]=useState<DecisionResult|null>(null);
   const [decisionBusy,setDecisionBusy]=useState(false);
 
@@ -337,14 +337,17 @@ export default function Home(){
         <div className="grid two">
           <Card title="Proposed enterprise / AI action" icon={Fingerprint}>
             <textarea className="editor kernel-editor" value={actionText} onChange={e=>setActionText(e.target.value)}/>
-            <label className="mini-label">Operational facts (semicolon separated)</label><textarea className="editor facts-editor" value={actionFacts} onChange={e=>setActionFacts(e.target.value)}/>
+            <label className="mini-label">Institutional facts · prefix each with [verified], [derived], [assumed], [missing], [conflicting] or [unverified]</label><textarea className="editor facts-editor" value={actionFacts} onChange={e=>setActionFacts(e.target.value)}/>
+            <div className="fact-legend"><span className="verified">Verified</span><span className="derived">Derived</span><span className="assumed">Assumed</span><span className="missing">Missing</span><span className="conflicting">Conflicting</span></div>
             <button className="primary full" onClick={runDecision} disabled={decisionBusy}>{decisionBusy?<Loader2 size={17} className="spin"/>:<ShieldCheck size={17}/>} Ask the Synesis legal kernel</button>
           </Card>
           <Card title="Machine decision" icon={ShieldCheck}>
             {!decision?<div className="empty compact"><Fingerprint size={34}/><h3>No receipt generated</h3><p>Run the proposed action through the legal kernel.</p></div>:<div className="receipt">
               <div className={"decision "+decision.receipt.decision.toLowerCase()}>{decision.receipt.decision}</div>
-              <p>{decision.receipt.decision==="BLOCK"?"The proposed action intersects a compiled prohibition.":"The action requires the obligations below to be satisfied or reviewed before execution."}</p>
-              <div className="receipt-grid"><span>Rules applied<b>{decision.receipt.ruleIds.join(", ")||"None"}</b></span><span>Timestamp<b>{fmtDate(decision.receipt.timestamp)}</b></span></div>
+              <p>{decision.receipt.stateStatus==="INSUFFICIENT_STATE"?"Synesis refused a final machine decision because critical institutional facts are missing or conflicting.":decision.receipt.decision==="BLOCK"?"The proposed action intersects a compiled prohibition.":"The action requires the obligations below to be satisfied or reviewed before execution."}</p>
+              <div className="receipt-grid"><span>Rules applied<b>{decision.receipt.ruleIds.join(", ")||"None"}</b></span><span>State quality<b>{decision.receipt.stateStatus||"SUFFICIENT"}</b></span><span>Timestamp<b>{fmtDate(decision.receipt.timestamp)}</b></span><span>Evidence gaps<b>{decision.receipt.missingEvidence?.length||0}</b></span></div>
+              {decision.receipt.blockingFacts&&decision.receipt.blockingFacts.length>0&&<div className="uncertainty-box"><b>Decision blocked by missing/conflicting state</b>{decision.receipt.blockingFacts.map((x,i)=><span key={i}>{x}</span>)}</div>}
+              {decision.receipt.assumptionFacts&&decision.receipt.assumptionFacts.length>0&&<div className="assumption-box"><b>Assumption-dependent facts</b>{decision.receipt.assumptionFacts.map((x,i)=><span key={i}>{x}</span>)}</div>}
               <div className="receipt-hash"><Fingerprint size={16}/><div><span>Decision receipt fingerprint · SHA-256</span><code>{decision.receipt.receiptHash}</code></div></div>
             </div>}
           </Card>
